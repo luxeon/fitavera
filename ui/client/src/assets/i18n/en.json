@@ -24,6 +24,7 @@
     },
     "errors": {
       "invalidCredentials": "Invalid email or password",
+      "forbidden": "You are not allowed to login",
       "general": "An error occurred. Please try again later"
     }
   },

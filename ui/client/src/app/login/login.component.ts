@@ -66,15 +66,19 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading = false;
+        let key;
         if (error.status === 401) {
-          this.translate.get('login.errors.invalidCredentials').subscribe((res: string) => {
-            this.errorMessage = res;
-          });
+          key = 'login.errors.invalidCredentials';
+        } else if (error.status === 403) {
+          key = 'login.errors.forbidden';
         } else {
-          this.translate.get('login.errors.general').subscribe((res: string) => {
-            this.errorMessage = res;
-          });
+          key = 'login.errors.general';
         }
+
+        this.translate.get(key).subscribe((res: string) => {
+          this.errorMessage = res;
+        });
+
         console.error('Login error:', error);
       }
     });

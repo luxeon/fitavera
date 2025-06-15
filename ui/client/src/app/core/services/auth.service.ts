@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import  {HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { InvitationStorageService } from './invitation-storage.service';
 
 export interface AuthRequest {
@@ -21,7 +21,7 @@ export interface UserClaims {
   lastName: string;
   email: string;
   phoneNumber?: string;
-  roles?: any[];
+  roles?: Array<{ authority: string }>;
   exp: number;
   iat?: number;
 }
@@ -33,11 +33,24 @@ export class AuthService {
   private http = inject(HttpClient);
   private invitationStorage = inject(InvitationStorageService);
   private readonly TOKEN_KEY = 'auth_token';
+  private readonly CLIENT_ROLE = 'ROLE_CLIENT';
 
   login(credentials: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/login', credentials)
       .pipe(
-        tap(response => this.storeToken(response.accessToken))
+        tap(response => {
+          const claims = this.decodeToken(response.accessToken);
+          if (!this.hasClientRole(claims)) {
+            throw new Error('User does not have client role');
+          }
+          this.storeToken(response.accessToken);
+        }),
+        catchError(error => {
+          if (error.message === 'User does not have client role') {
+            return throwError(() => new HttpErrorResponse({ error: 'Access denied: Client role required', status: 403}));
+          }
+          return throwError(() => error);
+        })
       );
   }
 
@@ -54,10 +67,18 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  hasClientRole(claims: UserClaims | null): boolean {
+    if (!claims || !claims.roles) return false;
+    return claims.roles.some(role => role.authority === this.CLIENT_ROLE);
+  }
+
   getUserClaims(): UserClaims | null {
     const token = this.getToken();
     if (!token) return null;
+    return this.decodeToken(token);
+  }
 
+  private decodeToken(token: string): UserClaims | null {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -77,4 +98,4 @@ export class AuthService {
   private storeToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
-} 
+}

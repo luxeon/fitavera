@@ -3,6 +3,7 @@ import { ClientSignupComponent } from './client-signup/client-signup.component';
 import { LoginComponent } from './login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { authGuard } from './core/guards/auth.guard';
+import { clientRoleGuard } from './core/guards/client-role.guard';
 import { ClientInvitationComponent } from './client-invitation/client-invitation.component';
 import { LocationListComponent } from './features/locations/location-list.component';
 import { LocationDetailsComponent } from './features/location-details/location-details.component';
@@ -19,7 +20,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, clientRoleGuard]
   },
   {
     path: 'tenants/:tenantId/clients/signup/:inviteId',
@@ -28,17 +29,17 @@ export const routes: Routes = [
   {
     path: 'tenants/:tenantId/clients/join/:inviteId',
     component: ClientInvitationComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, clientRoleGuard]
   },
   {
     path: 'tenant/:tenantId/locations',
     component: LocationListComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, clientRoleGuard]
   },
   {
     path: 'tenant/:tenantId/locations/:locationId',
     component: LocationDetailsComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, clientRoleGuard]
   },
   {
     path: '',
