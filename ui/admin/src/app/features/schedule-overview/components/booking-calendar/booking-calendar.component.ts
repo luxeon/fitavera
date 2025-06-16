@@ -88,7 +88,7 @@ interface CapacityInfo {
   `,
   styles: [`
     .booking-calendar {
-      padding: 20px;
+      padding: 0;
     }
 
     .calendar-header {
@@ -111,7 +111,7 @@ interface CapacityInfo {
     }
 
     .calendar-day {
-      min-height: 120px;
+      min-height: 100px;
       border: 1px solid #ddd;
       padding: 8px;
       position: relative;
