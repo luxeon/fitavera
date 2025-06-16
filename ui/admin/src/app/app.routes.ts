@@ -10,6 +10,7 @@ import { EmailConfirmationComponent } from './features/auth/email-confirmation/e
 import { ConfirmEmailComponent } from './features/auth/confirm-email/confirm-email.component';
 import { ClientDetailsComponent } from './features/dashboard/components/clients/client-details/client-details.component';
 import { AppLayoutComponent } from './shared/components/app-layout/app-layout.component';
+import { ScheduleOverviewComponent } from './features/schedule-overview/schedule-overview.component';
 
 export const routes: Routes = [
   // Public routes without layout
@@ -49,6 +50,11 @@ export const routes: Routes = [
         path: 'tenant/:tenantId/location/:locationId',
         component: ClubDetailsComponent,
         data: { titleKey: 'location.details.pageTitle' }
+      },
+      {
+        path: 'tenant/:tenantId/location/:locationId/schedule',
+        component: ScheduleOverviewComponent,
+        data: { titleKey: 'location.schedule.pageTitle' }
       },
       {
         path: 'dashboard',

@@ -72,9 +72,15 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
                 </mat-button-toggle>
               </mat-button-toggle-group>
             </div>
-            <button class="action-button" (click)="onAddSchedule()">
-              {{ 'location.details.schedule.add' | translate }}
-            </button>
+            <div class="action-buttons">
+              <button class="action-button secondary" (click)="onViewScheduleOverview()">
+                <mat-icon>calendar_month</mat-icon>
+                {{ 'location.details.schedule.overview' | translate }}
+              </button>
+              <button class="action-button" (click)="onAddSchedule()">
+                {{ 'location.details.schedule.add' | translate }}
+              </button>
+            </div>
           </div>
           <div class="loading" *ngIf="isLoadingSchedules">
             {{ 'common.loading' | translate }}
@@ -200,53 +206,18 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         display: flex;
         align-items: center;
         gap: 16px;
-
-        h3 {
-          margin: 0;
-          color: #2c3e50;
-          font-size: 20px;
-        }
-
-        .view-toggle {
-          height: 32px;
-          background: #f8f9fa;
-          border-radius: 4px;
-          overflow: hidden;
-
-          ::ng-deep {
-            .mat-button-toggle-group {
-              border: none;
-            }
-
-            .mat-button-toggle {
-              background: transparent;
-              border: none;
-              color: #6c757d;
-              line-height: 32px;
-              height: 32px;
-
-              .mat-button-toggle-label-content {
-                line-height: 32px;
-                padding: 0 16px;
-              }
-
-              &.mat-button-toggle-checked {
-                background: #3498db;
-                color: white;
-              }
-            }
-          }
-        }
       }
 
-      h3 {
-        margin: 0;
-        color: #2c3e50;
-        font-size: 20px;
+      .action-buttons {
+        display: flex;
+        gap: 12px;
       }
     }
 
     .action-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 16px;
       background: #3498db;
       color: white;
@@ -254,10 +225,20 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
-      transition: background-color 0.2s;
+      transition: all 0.2s ease;
+
+      &.secondary {
+        background: #95a5a6;
+      }
 
       &:hover {
-        background: #2980b9;
+        opacity: 0.9;
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
       }
     }
 
@@ -432,6 +413,10 @@ export class ClubDetailsComponent implements OnInit {
 
   onViewModeChange(mode: 'weekly' | 'daily'): void {
     this.scheduleViewMode = mode;
+  }
+
+  onViewScheduleOverview(): void {
+    this.router.navigate(['schedule'], { relativeTo: this.route });
   }
 
   private showSuccessMessage(key: string): void {

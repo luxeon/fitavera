@@ -214,7 +214,7 @@
     "details": {
       "pageTitle": "Club Location Details",
       "title": "Club Location Details",
-      "club_location_title": "Club Location Details",
+      "club_location_title": "Club Location",
       "tabs": {
         "workouts": "Workouts",
         "trainers": "Trainers",
@@ -241,14 +241,14 @@
         }
       },
       "schedule": {
-        "title": "Class Schedule",
+        "title": "Schedule",
         "add": "Add Schedule",
-        "empty": "No classes scheduled yet. Add workouts and trainers first, then create your schedule.",
+        "overview": "Schedule Overview",
+        "empty": "No schedules found",
         "delete": {
           "title": "Delete Schedule",
-          "message": "Are you sure you want to delete this class schedule? This action cannot be undone.",
-          "confirm": "Delete",
-          "success": "Schedule deleted successfully"
+          "message": "Are you sure you want to delete this schedule?",
+          "confirm": "Delete"
         }
       }
     },
@@ -287,6 +287,21 @@
       "Asia/Tokyo": "Tokyo",
       "Australia/Sydney": "Sydney",
       "Pacific/Auckland": "Auckland"
+    },
+    "schedule": {
+      "pageTitle": "Schedule Overview",
+      "capacity": {
+        "title": "Capacity",
+        "total": "Total Capacity",
+        "booked": "Booked",
+        "available": "Available",
+        "utilization": "Utilization"
+      },
+      "activity_types": {
+        "training": "Training",
+        "class": "Class",
+        "consultation": "Consultation"
+      }
     }
   },
   "training": {
@@ -551,22 +566,22 @@
     "daily_view": "Daily View",
     "classes": "Classes:",
     "days": {
+      "sunday": "Sunday",
       "monday": "Monday",
       "tuesday": "Tuesday",
       "wednesday": "Wednesday",
       "thursday": "Thursday",
       "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "saturday": "Saturday"
     },
     "form": {
       "workout": "Workout",
-      "selectWorkout": "Select a workout",
+      "selectWorkout": "Select workout",
       "workoutRequired": "Please select a workout",
       "trainer": "Trainer",
-      "selectTrainer": "Select a trainer",
+      "selectTrainer": "Select trainer",
       "trainerRequired": "Please select a trainer",
-      "daysOfWeek": "Days of the Week",
+      "daysOfWeek": "Days of Week",
       "daysRequired": "Please select at least one day",
       "startTime": "Start Time",
       "startTimeRequired": "Start time is required",
