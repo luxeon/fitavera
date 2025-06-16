@@ -1,7 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageSwitcherComponent } from '../language-switcher/language-switcher.component';
@@ -9,38 +12,74 @@ import { LanguageSwitcherComponent } from '../language-switcher/language-switche
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [MatIconModule, MatButtonModule, TranslateModule, LanguageSwitcherComponent],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatTooltipModule,
+    RouterModule,
+    TranslateModule,
+    LanguageSwitcherComponent
+  ],
   template: `
-    <header class="app-header">
-      <span class="app-title">FITAVERA APP</span>
-      <div class="actions-section">
-        <app-language-switcher></app-language-switcher>
-        <button mat-icon-button aria-label="Logout" (click)="logout()">
-          <mat-icon>logout</mat-icon>
-        </button>
+    <mat-toolbar color="primary">
+      <div class="toolbar-container">
+        <div class="logo-section">
+          <a routerLink="/dashboard" class="app-title">
+            <span class="fitavera">Fitavera</span><span class="app">APP</span>
+          </a>
+        </div>
+
+        <div class="actions-section">
+          <app-language-switcher></app-language-switcher>
+          <button mat-icon-button
+                  (click)="logout()"
+                  aria-label="Logout"
+                  [matTooltip]="'header.logout' | translate">
+            <mat-icon>exit_to_app</mat-icon>
+          </button>
+        </div>
       </div>
-    </header>
+    </mat-toolbar>
   `,
   styles: [`
-    .app-header {
+    .toolbar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    .logo-section {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: #3f51b5;
-      color: #fff;
-      padding: 0 24px;
-      height: 60px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
 
-    .app-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
 
-    button {
-      color: #fff;
+      .app-title {
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+      }
+
+      .app {
+        margin-left: 4px;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00eaff 0%, #00bfae 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+      }
     }
 
     .actions-section {
@@ -53,7 +92,6 @@ import { LanguageSwitcherComponent } from '../language-switcher/language-switche
 export class AppHeaderComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
-
 
   logout(): void {
     this.authService.logout();
