@@ -152,7 +152,8 @@ import { AuthService } from '../../core/services/auth.service';
           <mat-calendar
             [selected]="selectedDate"
             (selectedChange)="onDateSelected($event)"
-            [dateClass]="dateClass">
+            [dateClass]="dateClass"
+            [dateFilter]="dateFilter">
           </mat-calendar>
         </mat-card>
 
@@ -764,6 +765,14 @@ export class LocationDetailsComponent implements OnInit {
 
   // Map to track which trainings require purchase
   trainingsPurchaseRequired: { [trainingId: string]: boolean } = {};
+
+  // Date filter to prevent selecting past dates
+  dateFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  };
 
   readonly daysOfWeek = [
     'MONDAY',
