@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Subscription } from 'rxjs';
+import { LocaleInitService } from '../../../core/services/locale-init.service';
 
 interface Language {
   code: string;
@@ -89,8 +91,11 @@ interface Language {
     }
   `]
 })
-export class LanguageSwitcherComponent {
+export class LanguageSwitcherComponent implements OnInit, OnDestroy {
   private translate = inject(TranslateService);
+  private localeInitService = inject(LocaleInitService);
+  private langChangeSubscription?: Subscription;
+
   currentLang = signal(this.translate.currentLang || 'en');
 
   languages: Language[] = [
@@ -98,12 +103,36 @@ export class LanguageSwitcherComponent {
     { code: 'uk', name: 'Українська', flag: '🇺🇦' }
   ];
 
+  ngOnInit(): void {
+    // Subscribe to language changes from any source
+    this.langChangeSubscription = this.translate.onLangChange.subscribe(event => {
+      this.currentLang.set(event.lang);
+    });
+
+    // Also check current language on init in case it was already set
+    if (this.translate.currentLang) {
+      this.currentLang.set(this.translate.currentLang);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.langChangeSubscription?.unsubscribe();
+  }
+
   getCurrentLanguage(): Language {
     return this.languages.find(lang => lang.code === this.currentLang()) || this.languages[0];
   }
 
   switchLanguage(lang: string): void {
-    this.translate.use(lang);
-    this.currentLang.set(lang);
+    console.log('Language switcher changing language to:', lang);
+    // Use LocaleInitService to persist the user's choice
+    this.localeInitService.setLocale(lang).subscribe({
+      next: (appliedLocale: string) => {
+        this.currentLang.set(appliedLocale);
+      },
+      error: (error: any) => {
+        console.error('Language switcher failed to change language:', error);
+      }
+    });
   }
-} 
+}

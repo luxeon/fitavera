@@ -56,8 +56,9 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, StandardCharsets.UTF_8.name());
 
             Context context = new Context();
-            context.setVariable("registrationUrl", emailProperties.getClientRegistrationUrl()
-                    .formatted(tenant.getId(), invitation.getId()));
+            String registrationUrl = emailProperties.getClientRegistrationUrl()
+                    .formatted(tenant.getId(), invitation.getId()) + "?locale=" + tenant.getLocale().getLanguage();
+            context.setVariable("registrationUrl", registrationUrl);
             String inviterFullName = inviter.getFirstName() + " " + inviter.getLastName();
             context.setVariable("inviterName", inviterFullName);
             context.setVariable("tenantName", tenant.getName());

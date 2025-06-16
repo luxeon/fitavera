@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientSignupService, SignupClientRequest } from '../core/services/client-signup.service';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ClientSignupService } from '../core/services/client-signup.service';
 import { InvitationStorageService } from '../core/services/invitation-storage.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-client-signup',
@@ -38,6 +38,7 @@ export class ClientSignupComponent implements OnInit {
   private fb = inject(FormBuilder);
   private clientSignupService = inject(ClientSignupService);
   private invitationStorage = inject(InvitationStorageService);
+  private translateService = inject(TranslateService);
 
   tenantId: string = '';
   inviteId: string = '';
@@ -51,6 +52,16 @@ export class ClientSignupComponent implements OnInit {
   hideConfirmPassword = true;
 
   ngOnInit(): void {
+    // First, check for locale parameter and set it immediately
+    this.route.queryParams.subscribe(params => {
+      const locale = params['locale'];
+      if (locale && ['en', 'uk'].includes(locale)) {
+        // Set the locale and ensure translations are loaded
+        this.translateService.setDefaultLang('en');
+        this.translateService.use(locale);
+      }
+    });
+
     // First check URL parameters
     this.route.paramMap.subscribe(params => {
       const tenantIdParam = params.get('tenantId');
@@ -81,6 +92,12 @@ export class ClientSignupComponent implements OnInit {
       validators: this.passwordMatchValidator
     });
 
+    // Update form locale value if we detected it from URL
+    const urlLocale = this.route.snapshot.queryParams['locale'];
+    if (urlLocale && ['en', 'uk'].includes(urlLocale)) {
+      this.signupForm.patchValue({ locale: urlLocale });
+    }
+
     // Subscribe to phone number changes to auto-remove spaces and braces
     this.signupForm.get('phoneNumber')?.valueChanges.subscribe(value => {
       if (value) {
@@ -105,46 +122,37 @@ export class ClientSignupComponent implements OnInit {
     });
   }
 
-  passwordMatchValidator(formGroup: FormGroup) {
-    const password = formGroup.get('password')?.value;
-    const confirmPassword = formGroup.get('confirmPassword')?.value;
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
 
-    if (password !== confirmPassword) {
-      formGroup.get('confirmPassword')?.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    } else {
-      formGroup.get('confirmPassword')?.setErrors(null);
+    if (!password || !confirmPassword) {
       return null;
     }
+
+    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
-  onSubmit() {
-    if (this.signupForm.invalid) {
-      this.markFormGroupTouched(this.signupForm);
-      return;
-    }
+  onSubmit(): void {
+    if (this.signupForm.valid && !this.isSubmitting) {
+      this.isSubmitting = true;
+      this.submitError = null;
 
-    this.isSubmitting = true;
-    this.submitError = null;
+      const formValue = this.signupForm.value;
+      const signupRequest = {
+        firstName: formValue.firstName,
+        lastName: formValue.lastName,
+        phoneNumber: formValue.phoneNumber || null,
+        password: formValue.password,
+        locale: formValue.locale
+      };
 
-    const request: SignupClientRequest = {
-      firstName: this.signupForm.get('firstName')!.value,
-      lastName: this.signupForm.get('lastName')!.value,
-      phoneNumber: this.signupForm.get('phoneNumber')!.value,
-      password: this.signupForm.get('password')!.value,
-      locale: this.signupForm.get('locale')!.value
-    };
-
-    this.clientSignupService.signup(this.tenantId, this.inviteId, request)
-      .subscribe({
-        next: () => {
+      this.clientSignupService.signup(this.tenantId, this.inviteId, signupRequest).subscribe({
+        next: (response) => {
           this.isSubmitting = false;
           this.submitSuccess = true;
-
-          // Clear any stored invitation data
           this.invitationStorage.clearStoredInvitation();
 
-          // Redirect to login page after 3 seconds
           setTimeout(() => {
             this.router.navigate(['/login']);
           }, 3000);
@@ -152,15 +160,18 @@ export class ClientSignupComponent implements OnInit {
         error: (error) => {
           this.isSubmitting = false;
 
-          if (error.status === 404) {
+          if (error.status === 400) {
+            this.submitError = 'Invalid registration data. Please check your inputs.';
+          } else if (error.status === 404) {
             this.submitError = 'The invitation was not found or has expired.';
-          } else if (error.status === 400) {
-            this.submitError = 'Please check your information and try again.';
+          } else if (error.status === 409) {
+            this.submitError = 'An account with this email already exists.';
           } else {
-            this.submitError = 'An error occurred during signup. Please try again later.';
+            this.submitError = 'An error occurred during registration. Please try again.';
           }
         }
       });
+    }
   }
 
   // Helper method to mark all controls as touched
