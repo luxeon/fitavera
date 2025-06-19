@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -28,7 +28,7 @@ import { InvitationStorageService } from '../core/services/invitation-storage.se
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -49,6 +49,13 @@ export class LoginComponent {
 
     // Check if there's a pending invitation
     this.hasPendingInvitation = this.invitationStorage.hasPendingInvitation();
+  }
+
+  ngOnInit(): void {
+    // Check if user is already logged in and redirect to dashboard
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   onSubmit(): void {

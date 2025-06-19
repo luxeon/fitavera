@@ -50,6 +50,12 @@ export class LoginComponent implements OnInit {
   }
 
   async ngOnInit() {
+    // Check if user is already logged in and redirect to dashboard
+    if (this.authService.isAuthenticated()) {
+      await this.router.navigate(['/dashboard']);
+      return;
+    }
+
     // Wait for translations to be loaded
     await firstValueFrom(this.translate.get('login'));
 
