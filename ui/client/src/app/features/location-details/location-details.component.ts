@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, Input, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService, LangChangeEvent } from '@ngx-translate/core';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { SchedulePageItemResponse, VisitResponse, ScheduleViewResponse } from '../../core/models/schedule.model';
 import { ActivatedRoute } from '@angular/router';
@@ -17,13 +17,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideNativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { MatCalendar } from '@angular/material/datepicker';
 import { MatCalendarCellCssClasses } from '@angular/material/datepicker';
 import { BreadcrumbComponent } from '../../shared/components/breadcrumb/breadcrumb.component';
 import { PaymentHistoryComponent } from './payment-history.component';
 import { TrainingService } from '../../core/services/training.service';
 import { AuthService } from '../../core/services/auth.service';
+import { CustomCalendarHeaderComponent } from '../../shared/components/custom-calendar-header/custom-calendar-header.component';
 
 @Component({
   selector: 'app-schedule-list',
@@ -171,10 +172,12 @@ import { AuthService } from '../../core/services/auth.service';
       <div class="calendar-view" *ngIf="!isLoading && schedules?.length && viewMode === 'calendar'" @fadeInOut>
         <mat-card class="calendar-card">
           <mat-calendar
+            *ngIf="showCalendar"
             [selected]="selectedDate"
             (selectedChange)="onDateSelected($event)"
             [dateClass]="dateClass"
-            [dateFilter]="dateFilter">
+            [dateFilter]="dateFilter"
+            [headerComponent]="customHeader">
           </mat-calendar>
         </mat-card>
 
@@ -712,6 +715,10 @@ import { AuthService } from '../../core/services/auth.service';
             min-width: 280px;
           }
 
+          .mat-calendar-body-label {
+            display: none;
+          }
+
           .mat-calendar-body-cell.has-events::after {
             background-color: #2196f3;
             content: '';
@@ -940,6 +947,11 @@ export class LocationDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
   protected translate = inject(TranslateService);
+  private dateAdapter = inject(DateAdapter<any>);
+  private cdr = inject(ChangeDetectorRef);
+
+  customHeader = CustomCalendarHeaderComponent;
+  showCalendar = true;
 
   schedules: SchedulePageItemResponse[] | null = null;
   scheduleViewData: ScheduleViewResponse | null = null;
@@ -979,6 +991,15 @@ export class LocationDetailsComponent implements OnInit {
   selectedDate: Date = new Date();
 
   ngOnInit(): void {
+    this.setCalendarLocale(this.translate.currentLang);
+    this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
+      this.setCalendarLocale(event.lang);
+      // Force calendar to re-render to apply new locale for day/month names
+      this.showCalendar = false;
+      this.cdr.detectChanges();
+      this.showCalendar = true;
+    });
+
     this.route.params.subscribe(params => {
       this.tenantId = params['tenantId'];
       this.locationId = params['locationId'];
@@ -1242,8 +1263,9 @@ export class LocationDetailsComponent implements OnInit {
   }
 
   getDayName(dayIndex: number): string {
-    const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-    return days[dayIndex];
+    // Convert JavaScript day index (0=Sunday, 1=Monday, etc.) to our Monday-first format
+    const dayMap = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    return dayMap[dayIndex];
   }
 
   getVisit(scheduleId: string): VisitResponse | undefined {
@@ -1329,6 +1351,11 @@ export class LocationDetailsComponent implements OnInit {
         this.calendar.updateTodaysDate();
       }
     });
+  }
+
+  private setCalendarLocale(lang: string): void {
+    const materialLocale = lang === 'en' ? 'en-GB' : lang;
+    this.dateAdapter.setLocale(materialLocale);
   }
 
   /**
