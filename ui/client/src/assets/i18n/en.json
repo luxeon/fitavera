@@ -118,6 +118,7 @@
     "capacity": "Capacity",
     "available_slots": "Available slots",
     "registered": "Registered",
+    "no_available_slots": "No available slots",
     "booked": "Booked",
     "no_schedules_for_day": "No schedules for this day",
     "no_visits_booked": "This date is not booked yet",

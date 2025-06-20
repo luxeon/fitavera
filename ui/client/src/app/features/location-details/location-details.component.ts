@@ -96,7 +96,9 @@ import { AuthService } from '../../core/services/auth.service';
                     <div class="schedule-card"
                          [class.has-visit]="hasVisit(schedule.id)"
                          [class.purchase-required]="!hasVisitOnDate(schedule.id, selectedDate) && isPurchaseRequired(schedule)"
-                         (click)="openVisitDialog(schedule, day)">
+                         [class.no-available-slots]="hasNoAvailableSlotsForDay(schedule.id, day) && !hasVisit(schedule.id)"
+                         [class.disabled]="isScheduleDisabledForDay(schedule, day)"
+                         (click)="!isScheduleDisabledForDay(schedule, day) && openVisitDialog(schedule, day)">
                       <div class="schedule-info">
                         <div class="time-slot">
                           {{ schedule.startTime | slice:0:5 }} - {{ schedule.endTime | slice:0:5 }}
@@ -114,7 +116,9 @@ import { AuthService } from '../../core/services/auth.service';
                         <!-- Available slots information -->
                         <div class="available-slots" *ngIf="scheduleViewData">
                           <div class="slots-info">
-                            <span class="available">{{ 'schedules.available_slots' | translate }}: {{ getAvailableSlotsForDay(schedule.id, day).available }}</span>
+                            <span class="available" [class.no-slots]="hasNoAvailableSlotsForDay(schedule.id, day) && !hasVisit(schedule.id)">
+                              {{ 'schedules.available_slots' | translate }}: {{ getAvailableSlotsForDay(schedule.id, day).available }}
+                            </span>
                             <span class="registered" *ngIf="getAvailableSlotsForDay(schedule.id, day).registered > 0">
                               {{ 'schedules.registered' | translate }}: {{ getAvailableSlotsForDay(schedule.id, day).registered }}
                             </span>
@@ -125,6 +129,13 @@ import { AuthService } from '../../core/services/auth.service';
                           <div class="purchase-required-badge">
                             <mat-icon color="warn">shopping_cart</mat-icon>
                             {{ 'schedules.purchase_required' | translate }}
+                          </div>
+                        }
+
+                        @if (hasNoAvailableSlotsForDay(schedule.id, day) && !hasVisit(schedule.id)) {
+                          <div class="no-slots-badge">
+                            <mat-icon color="warn">event_busy</mat-icon>
+                            {{ 'schedules.no_available_slots' | translate }}
                           </div>
                         }
 
@@ -177,7 +188,9 @@ import { AuthService } from '../../core/services/auth.service';
                 <div class="schedule-card"
                      [class.has-visit]="hasVisitOnDate(schedule.id, selectedDate)"
                      [class.purchase-required]="!hasVisitOnDate(schedule.id, selectedDate) && isPurchaseRequired(schedule)"
-                     (click)="openVisitDialog(schedule, getDayName(selectedDate.getDay()))">
+                     [class.no-available-slots]="hasNoAvailableSlots(schedule.id, selectedDate) && !hasVisitOnDate(schedule.id, selectedDate)"
+                     [class.disabled]="isScheduleDisabled(schedule, selectedDate)"
+                     (click)="!isScheduleDisabled(schedule, selectedDate) && openVisitDialog(schedule, getDayName(selectedDate.getDay()))">
                   <div class="schedule-info">
                     <div class="time-slot">
                       {{ schedule.startTime | slice:0:5 }} - {{ schedule.endTime | slice:0:5 }}
@@ -195,7 +208,9 @@ import { AuthService } from '../../core/services/auth.service';
                     <!-- Available slots information -->
                     <div class="available-slots" *ngIf="scheduleViewData">
                       <div class="slots-info">
-                        <span class="available">{{ 'schedules.available_slots' | translate }}: {{ getAvailableSlots(schedule.id, selectedDate) }}</span>
+                        <span class="available" [class.no-slots]="hasNoAvailableSlots(schedule.id, selectedDate) && !hasVisitOnDate(schedule.id, selectedDate)">
+                          {{ 'schedules.available_slots' | translate }}: {{ getAvailableSlots(schedule.id, selectedDate) }}
+                        </span>
                         <span class="registered" *ngIf="getRegisteredClientsCount(schedule.id, selectedDate) > 0">
                           {{ 'schedules.registered' | translate }}: {{ getRegisteredClientsCount(schedule.id, selectedDate) }}
                         </span>
@@ -208,6 +223,14 @@ import { AuthService } from '../../core/services/auth.service';
                         {{ 'schedules.purchase_required' | translate }}
                       </div>
                     }
+
+                    @if (hasNoAvailableSlots(schedule.id, selectedDate) && !hasVisitOnDate(schedule.id, selectedDate)) {
+                      <div class="no-slots-badge">
+                        <mat-icon color="warn">event_busy</mat-icon>
+                        {{ 'schedules.no_available_slots' | translate }}
+                      </div>
+                    }
+
                     @if (hasVisitOnDate(schedule.id, selectedDate)) {
                       <div class="visit-info">
                         <div class="visit-badge">
@@ -432,6 +455,22 @@ import { AuthService } from '../../core/services/auth.service';
           border: 2px solid #f44336;
         }
 
+        &.no-available-slots {
+          border: 2px solid #ff9800;
+          background-color: #fff3e0;
+        }
+
+        &.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          pointer-events: none;
+
+          &:hover {
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          }
+        }
+
         .schedule-info {
           .time-slot {
             font-weight: 500;
@@ -499,6 +538,10 @@ import { AuthService } from '../../core/services/auth.service';
 
                 @media (max-width: 768px) {
                   font-size: 12px;
+                }
+
+                &.no-slots {
+                  color: #f44336;
                 }
               }
 
@@ -742,6 +785,22 @@ import { AuthService } from '../../core/services/auth.service';
           border: 2px solid #f44336;
         }
 
+        &.no-available-slots {
+          border: 2px solid #ff9800;
+          background-color: #fff3e0;
+        }
+
+        &.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          pointer-events: none;
+
+          &:hover {
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          }
+        }
+
         .schedule-info {
           .time-slot {
             font-weight: 500;
@@ -793,6 +852,10 @@ import { AuthService } from '../../core/services/auth.service';
                 @media (max-width: 768px) {
                   font-size: 12px;
                 }
+
+                &.no-slots {
+                  color: #f44336;
+                }
               }
 
               .registered {
@@ -835,6 +898,35 @@ import { AuthService } from '../../core/services/auth.service';
         background: #f8f9fa;
         border-radius: 8px;
         font-size: 14px;
+      }
+    }
+
+    .no-slots-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #f44336;
+      font-size: 13px;
+      margin-top: 8px;
+      padding: 4px 8px;
+      background-color: #ffebee;
+      border-radius: 4px;
+
+      @media (max-width: 768px) {
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+
+        @media (max-width: 768px) {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
       }
     }
   `]
@@ -1345,5 +1437,45 @@ export class LocationDetailsComponent implements OnInit {
           console.error('Error loading schedule view data:', error);
         }
       });
+  }
+
+  /**
+   * Check if a schedule has no available slots on a specific date
+   */
+  hasNoAvailableSlots(scheduleId: string, date: Date): boolean {
+    return this.getAvailableSlots(scheduleId, date) === 0;
+  }
+
+  /**
+   * Check if a schedule has no available slots on a specific day of the week
+   */
+  hasNoAvailableSlotsForDay(scheduleId: string, day: string): boolean {
+    return this.getAvailableSlotsForDay(scheduleId, day).available === 0;
+  }
+
+  /**
+   * Check if a schedule should be disabled (no available slots or purchase required)
+   */
+  isScheduleDisabled(schedule: SchedulePageItemResponse, date: Date): boolean {
+    // Allow clicking if user has already booked this schedule on this date (for cancellation)
+    if (this.hasVisitOnDate(schedule.id, date)) {
+      return false;
+    }
+    
+    // Disable if no available slots or purchase required
+    return this.hasNoAvailableSlots(schedule.id, date) || this.isPurchaseRequired(schedule);
+  }
+
+  /**
+   * Check if a schedule should be disabled for weekly view
+   */
+  isScheduleDisabledForDay(schedule: SchedulePageItemResponse, day: string): boolean {
+    // Allow clicking if user has already booked this schedule on this day (for cancellation)
+    if (this.hasVisit(schedule.id)) {
+      return false;
+    }
+    
+    // Disable if no available slots or purchase required
+    return this.hasNoAvailableSlotsForDay(schedule.id, day) || this.isPurchaseRequired(schedule);
   }
 }
