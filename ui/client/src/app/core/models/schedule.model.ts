@@ -69,4 +69,37 @@ export interface PageResponse<T> {
   numberOfElements: number;
   first: boolean;
   empty: boolean;
-} 
+}
+
+// New interfaces for ScheduleViewResponse
+export interface ScheduleViewResponse {
+  schedules: ScheduleViewItem[];
+}
+
+export interface ScheduleViewItem {
+  id: string;
+  startTime: string;
+  endTime: string;
+  clientCapacity: number;
+  defaultTrainer: ScheduleViewTrainer;
+  training: ScheduleViewTraining;
+  sessions: ScheduleViewSession[];
+}
+
+export interface ScheduleViewTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface ScheduleViewTraining {
+  id: string;
+  name: string;
+  description: string;
+  durationMinutes: number;
+}
+
+export interface ScheduleViewSession {
+  date: string;
+  registeredClientsCount: number;
+}

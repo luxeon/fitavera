@@ -2,7 +2,7 @@ import { Component, OnInit, inject, Input, Output, EventEmitter, ViewChild } fro
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ScheduleService } from '../../core/services/schedule.service';
-import { SchedulePageItemResponse, VisitResponse } from '../../core/models/schedule.model';
+import { SchedulePageItemResponse, VisitResponse, ScheduleViewResponse } from '../../core/models/schedule.model';
 import { ActivatedRoute } from '@angular/router';
 import { LocationService } from '../../core/services/location.service';
 import { LocationPageItemResponse } from '../../core/models/location.model';
@@ -111,6 +111,16 @@ import { AuthService } from '../../core/services/auth.service';
                           {{ 'schedules.capacity' | translate }}: {{ schedule.clientCapacity }}
                         </div>
 
+                        <!-- Available slots information -->
+                        <div class="available-slots" *ngIf="scheduleViewData">
+                          <div class="slots-info">
+                            <span class="available">{{ 'schedules.available_slots' | translate }}: {{ getAvailableSlotsForDay(schedule.id, day).available }}</span>
+                            <span class="registered" *ngIf="getAvailableSlotsForDay(schedule.id, day).registered > 0">
+                              {{ 'schedules.registered' | translate }}: {{ getAvailableSlotsForDay(schedule.id, day).registered }}
+                            </span>
+                          </div>
+                        </div>
+
                         @if (!hasVisitOnDate(schedule.id, selectedDate) && isPurchaseRequired(schedule)) {
                           <div class="purchase-required-badge">
                             <mat-icon color="warn">shopping_cart</mat-icon>
@@ -181,6 +191,17 @@ import { AuthService } from '../../core/services/auth.service';
                     <div class="capacity">
                       {{ 'schedules.capacity' | translate }}: {{ schedule.clientCapacity }}
                     </div>
+
+                    <!-- Available slots information -->
+                    <div class="available-slots" *ngIf="scheduleViewData">
+                      <div class="slots-info">
+                        <span class="available">{{ 'schedules.available_slots' | translate }}: {{ getAvailableSlots(schedule.id, selectedDate) }}</span>
+                        <span class="registered" *ngIf="getRegisteredClientsCount(schedule.id, selectedDate) > 0">
+                          {{ 'schedules.registered' | translate }}: {{ getRegisteredClientsCount(schedule.id, selectedDate) }}
+                        </span>
+                      </div>
+                    </div>
+
                     @if (!hasVisitOnDate(schedule.id, selectedDate) && isPurchaseRequired(schedule)) {
                       <div class="purchase-required-badge">
                         <mat-icon color="warn">shopping_cart</mat-icon>
@@ -453,6 +474,44 @@ import { AuthService } from '../../core/services/auth.service';
               font-size: 12px;
             }
           }
+
+          .available-slots {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+
+            @media (max-width: 768px) {
+              margin-top: 6px;
+              padding: 6px;
+            }
+
+            .slots-info {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+
+              .available {
+                color: #28a745;
+                font-weight: 500;
+                font-size: 13px;
+
+                @media (max-width: 768px) {
+                  font-size: 12px;
+                }
+              }
+
+              .registered {
+                color: #6c757d;
+                font-size: 12px;
+
+                @media (max-width: 768px) {
+                  font-size: 11px;
+                }
+              }
+            }
+          }
         }
       }
 
@@ -708,6 +767,44 @@ import { AuthService } from '../../core/services/auth.service';
             color: #6c757d;
             font-size: 13px;
           }
+
+          .available-slots {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+
+            @media (max-width: 768px) {
+              margin-top: 6px;
+              padding: 6px;
+            }
+
+            .slots-info {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+
+              .available {
+                color: #28a745;
+                font-weight: 500;
+                font-size: 13px;
+
+                @media (max-width: 768px) {
+                  font-size: 12px;
+                }
+              }
+
+              .registered {
+                color: #6c757d;
+                font-size: 12px;
+
+                @media (max-width: 768px) {
+                  font-size: 11px;
+                }
+              }
+            }
+          }
         }
 
         .visit-info {
@@ -753,6 +850,7 @@ export class LocationDetailsComponent implements OnInit {
   protected translate = inject(TranslateService);
 
   schedules: SchedulePageItemResponse[] | null = null;
+  scheduleViewData: ScheduleViewResponse | null = null;
   location: LocationPageItemResponse | null = null;
   visits: VisitResponse[] = [];
   isLoading = false;
@@ -806,17 +904,22 @@ export class LocationDetailsComponent implements OnInit {
   loadData(): void {
     this.isLoading = true;
 
+    const currentYear = this.selectedDate.getFullYear();
+    const currentMonth = this.selectedDate.getMonth() + 1;
+
     combineLatest([
       this.locationService.getLocations(this.tenantId).pipe(
         map(response => response.content.find(loc => loc.id === this.locationId) || null)
       ),
       this.scheduleService.getSchedules(this.tenantId, this.locationId),
-      this.visitService.getUserVisits(this.tenantId, this.locationId)
+      this.visitService.getUserVisits(this.tenantId, this.locationId),
+      this.visitService.getSchedulesViewForMonth(this.tenantId, this.locationId, currentYear, currentMonth)
     ]).subscribe({
-      next: ([location, schedules, visits]) => {
+      next: ([location, schedules, visits, scheduleViewData]) => {
         this.location = location;
         this.schedules = schedules || [];
         this.visits = visits;
+        this.scheduleViewData = scheduleViewData;
         // Clear the cache when visits are updated
         this.bookedDatesCache = {};
 
@@ -913,6 +1016,16 @@ export class LocationDetailsComponent implements OnInit {
   onDateSelected(date: Date | null): void {
     if (date) {
       this.selectedDate = date;
+
+      // Load schedule view data for the new month if it's different
+      const newYear = date.getFullYear();
+      const newMonth = date.getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+
+      if (newYear !== currentYear || newMonth !== currentMonth) {
+        this.loadScheduleViewDataForMonth(newYear, newMonth);
+      }
     }
   }
 
@@ -1124,5 +1237,113 @@ export class LocationDetailsComponent implements OnInit {
         this.calendar.updateTodaysDate();
       }
     });
+  }
+
+  /**
+   * Get available slots for a specific schedule on a specific date
+   */
+  getAvailableSlots(scheduleId: string, date: Date): number {
+    if (!this.scheduleViewData) return 0;
+
+    const schedule = this.scheduleViewData.schedules.find(s => s.id === scheduleId);
+    if (!schedule) return 0;
+
+    const dateString = this.formatDateForComparison(date);
+    const session = schedule.sessions.find(s => s.date === dateString);
+
+    if (!session) {
+      // No sessions for this date, all slots are available
+      return schedule.clientCapacity;
+    }
+
+    return Math.max(0, schedule.clientCapacity - session.registeredClientsCount);
+  }
+
+  /**
+   * Get available slots for a specific schedule on a specific day of the week
+   * This is used for weekly view to show average availability
+   */
+  getAvailableSlotsForDay(scheduleId: string, day: string): { available: number; total: number; registered: number } {
+    if (!this.scheduleViewData) return { available: 0, total: 0, registered: 0 };
+
+    const schedule = this.scheduleViewData.schedules.find(s => s.id === scheduleId);
+    if (!schedule) return { available: 0, total: 0, registered: 0 };
+
+    // Get all sessions for this schedule
+    const sessions = schedule.sessions;
+    let totalRegistered = 0;
+    let sessionCount = 0;
+
+    sessions.forEach(session => {
+      const sessionDate = new Date(session.date);
+      const sessionDay = this.getDayName(sessionDate.getDay());
+
+      if (sessionDay === day) {
+        totalRegistered += session.registeredClientsCount;
+        sessionCount++;
+      }
+    });
+
+    const totalCapacity = schedule.clientCapacity * sessionCount;
+    const available = Math.max(0, totalCapacity - totalRegistered);
+
+    return {
+      available,
+      total: totalCapacity,
+      registered: totalRegistered
+    };
+  }
+
+  /**
+   * Get registered clients count for a specific schedule on a specific date
+   */
+  getRegisteredClientsCount(scheduleId: string, date: Date): number {
+    if (!this.scheduleViewData) return 0;
+
+    const schedule = this.scheduleViewData.schedules.find(s => s.id === scheduleId);
+    if (!schedule) return 0;
+
+    const dateString = this.formatDateForComparison(date);
+    const session = schedule.sessions.find(s => s.date === dateString);
+
+    return session?.registeredClientsCount || 0;
+  }
+
+  /**
+   * Check if a schedule has sessions on a specific date
+   */
+  hasSessionsOnDate(scheduleId: string, date: Date): boolean {
+    if (!this.scheduleViewData) return false;
+
+    const schedule = this.scheduleViewData.schedules.find(s => s.id === scheduleId);
+    if (!schedule) return false;
+
+    const dateString = this.formatDateForComparison(date);
+    return schedule.sessions.some(s => s.date === dateString);
+  }
+
+  /**
+   * Format date for comparison with backend date format (yyyy-MM-dd)
+   */
+  private formatDateForComparison(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Load schedule view data for a specific month
+   */
+  loadScheduleViewDataForMonth(year: number, month: number): void {
+    this.visitService.getSchedulesViewForMonth(this.tenantId, this.locationId, year, month)
+      .subscribe({
+        next: (scheduleViewData) => {
+          this.scheduleViewData = scheduleViewData;
+        },
+        error: (error) => {
+          console.error('Error loading schedule view data:', error);
+        }
+      });
   }
 }

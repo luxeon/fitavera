@@ -116,6 +116,8 @@
     "calendar_view": "Календар",
     "weekly_view": "Тижневий",
     "capacity": "Місткість",
+    "available_slots": "Доступні місця",
+    "registered": "Зареєстровано",
     "booked": "Заброньовано",
     "no_schedules_for_day": "Немає розкладів на цей день",
     "no_visits_booked": "Ця дата ще не заброньована",

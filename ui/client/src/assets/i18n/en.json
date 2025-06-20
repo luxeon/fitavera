@@ -116,6 +116,8 @@
     "calendar_view": "Calendar",
     "weekly_view": "Weekly",
     "capacity": "Capacity",
+    "available_slots": "Available slots",
+    "registered": "Registered",
     "booked": "Booked",
     "no_schedules_for_day": "No schedules for this day",
     "no_visits_booked": "This date is not booked yet",
