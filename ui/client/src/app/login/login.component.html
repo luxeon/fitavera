@@ -15,6 +15,10 @@
           {{ 'login.invitationMessage' | translate }}
         </div>
 
+        <div *ngIf="showInvitationMessage && !hasPendingInvitation" class="info-message">
+          {{ 'login.invitationPendingMessage' | translate }}
+        </div>
+
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>{{ 'login.form.email.label' | translate }}</mat-label>
@@ -51,8 +55,15 @@
             <span *ngIf="!isLoading">{{ 'login.form.submit' | translate }}</span>
           </button>
 
-          <div class="signup-link">
+          <!-- TEMPORARILY DISABLED: Direct registration link -->
+          <!-- TODO: Re-enable when direct registration is needed again -->
+          <!-- <div class="signup-link">
             {{ 'login.signup.text' | translate }} <a routerLink="/signup">{{ 'login.signup.link' | translate }}</a>
+          </div> -->
+
+          <!-- Temporary message indicating registration is invitation-only -->
+          <div *ngIf="showNoInvitationMessage && redirectedFromSignup" class="info-message" style="text-align: center; margin-top: 16px; color: #666;">
+            <small>{{ 'login.registrationInfo' | translate }}</small>
           </div>
         </form>
       </mat-card-content>

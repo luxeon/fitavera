@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,6 +32,7 @@ export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private invitationStorage = inject(InvitationStorageService);
   private translate = inject(TranslateService);
 
@@ -40,6 +41,9 @@ export class LoginComponent implements OnInit {
   hidePassword = true;
   errorMessage = '';
   hasPendingInvitation = false;
+  showInvitationMessage = false;
+  showNoInvitationMessage = false;
+  redirectedFromSignup = false;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -55,7 +59,22 @@ export class LoginComponent implements OnInit {
     // Check if user is already logged in and redirect to dashboard
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
+      return;
     }
+
+    // Check for invitation query parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['invitation'] === 'pending') {
+        this.showInvitationMessage = true;
+        this.hasPendingInvitation = this.invitationStorage.hasPendingInvitation();
+      }
+      
+      // Check for no-invitation error (only show if redirected from signup)
+      if (params['error'] === 'no-invitation') {
+        this.showNoInvitationMessage = true;
+        this.redirectedFromSignup = true;
+      }
+    });
   }
 
   onSubmit(): void {

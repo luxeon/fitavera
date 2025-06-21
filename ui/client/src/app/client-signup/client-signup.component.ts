@@ -62,6 +62,17 @@ export class ClientSignupComponent implements OnInit {
       }
     });
 
+    // Check if user has a pending invitation - if not, redirect to login
+    if (!this.invitationStorage.hasPendingInvitation()) {
+      this.router.navigate(['/login'], { 
+        queryParams: { 
+          error: 'no-invitation',
+          ...(this.route.snapshot.queryParams['locale'] ? { locale: this.route.snapshot.queryParams['locale'] } : {})
+        }
+      });
+      return;
+    }
+
     // First check URL parameters
     this.route.paramMap.subscribe(params => {
       const tenantIdParam = params.get('tenantId');

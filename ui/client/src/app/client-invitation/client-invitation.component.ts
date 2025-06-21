@@ -90,6 +90,7 @@ export class ClientInvitationComponent implements OnInit {
         this.joinTenant(tenantId, inviteId);
       } else {
         // If not logged in, store the invitation data and redirect to signup
+        // Note: Direct registration is disabled, but invitation-based registration should still work
         this.invitationStorageService.storeInvitation(tenantId, inviteId);
 
         // Pass the locale as query parameter when redirecting to signup

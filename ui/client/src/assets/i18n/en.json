@@ -6,6 +6,8 @@
     "title": "Welcome Back",
     "subtitle": "Sign in to your account",
     "invitationMessage": "Sign in to join the sport club you were invited to",
+    "invitationPendingMessage": "You have a pending invitation. Please log in to your account to join the club.",
+    "noInvitationMessage": "Registration requires an invitation. Please contact your club administrator for an invitation link.",
     "form": {
       "email": {
         "label": "Email",
@@ -25,6 +27,7 @@
       "text": "Don't have an account?",
       "link": "Sign up"
     },
+    "registrationInfo": "Registration is currently invitation-only. Please contact your club administrator for an invitation.",
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "forbidden": "You are not allowed to login",
