@@ -33,12 +33,14 @@ import { LanguageSwitcherComponent } from '../language-switcher/language-switche
 
         <div class="actions-section">
           <app-language-switcher></app-language-switcher>
-          <button mat-icon-button
-                  (click)="logout()"
-                  aria-label="Logout"
-                  [matTooltip]="'header.logout' | translate">
-            <mat-icon>exit_to_app</mat-icon>
-          </button>
+          @if (isLogged()) {
+            <button mat-icon-button
+                    (click)="logout()"
+                    aria-label="Logout"
+                    [matTooltip]="'header.logout' | translate">
+              <mat-icon>exit_to_app</mat-icon>
+            </button>
+          }
         </div>
       </div>
     </mat-toolbar>
@@ -96,5 +98,9 @@ export class AppHeaderComponent {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  isLogged() {
+    return this.authService.isLoggedIn();
   }
 }

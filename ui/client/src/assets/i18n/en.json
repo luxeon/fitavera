@@ -1,4 +1,7 @@
 {
+  "header": {
+    "logout": "Logout"
+  },
   "login": {
     "title": "Welcome Back",
     "subtitle": "Sign in to your account",
