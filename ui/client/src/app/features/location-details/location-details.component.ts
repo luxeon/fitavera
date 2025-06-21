@@ -1321,12 +1321,24 @@ export class LocationDetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.success) {
-        // Refresh visits after successful booking/cancellation
-        this.visitService.getUserVisits(this.tenantId, this.locationId).subscribe(
-          visits => {
+        // Refresh all data after successful booking/cancellation
+        const currentYear = this.selectedDate.getFullYear();
+        const currentMonth = this.selectedDate.getMonth() + 1;
+
+        combineLatest([
+          this.visitService.getUserVisits(this.tenantId, this.locationId),
+          this.visitService.getSchedulesViewForMonth(this.tenantId, this.locationId, currentYear, currentMonth)
+        ]).subscribe({
+          next: ([visits, scheduleViewData]) => {
             this.visits = visits;
+            this.scheduleViewData = scheduleViewData;
             // Clear the cache when visits are updated
             this.bookedDatesCache = {};
+
+            // Refresh training credits if client ID is available
+            if (this.clientId && this.schedules?.length) {
+              this.checkTrainingCredits();
+            }
 
             // Force refresh the calendar view by creating a new date object
             // This ensures the calendar markers update immediately
@@ -1337,8 +1349,11 @@ export class LocationDetailsComponent implements OnInit {
                 this.refreshCalendar();
               });
             }
+          },
+          error: (error) => {
+            console.error('Error refreshing data after visit action:', error);
           }
-        );
+        });
       }
     });
   }
