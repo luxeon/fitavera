@@ -11,9 +11,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { PaymentService, PaymentPageItemResponse, PaymentStatus, TrainingCreditsSummaryResponse } from '../../core/services/payment.service';
-import { AuthService } from '../../core/services/auth.service';
-import { Page } from '../../core/models/page.model';
+import { PaymentService, PaymentPageItemResponse, PaymentStatus, TrainingCreditsSummaryResponse } from '../../../core/services/payment.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Page } from '../../../core/models/page.model';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -357,4 +357,4 @@ export class PaymentHistoryComponent implements OnInit {
   getCreditsSummary(payment: PaymentPageItemResponse): TrainingCreditsSummaryResponse | undefined {
     return payment.training?.id ? this.creditsSummaries.get(payment.training.id) : undefined;
   }
-}
+} 

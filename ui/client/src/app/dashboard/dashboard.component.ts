@@ -9,8 +9,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService, UserClaims } from '../core/services/auth.service';
 import { TenantService, Tenant } from '../core/services/tenant.service';
-import { LocationService } from '../core/services/location.service';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,7 +28,6 @@ import { firstValueFrom } from 'rxjs';
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private tenantService = inject(TenantService);
-  private locationService = inject(LocationService);
   private router = inject(Router);
 
   userClaims = signal<UserClaims | null>(null);
@@ -57,17 +54,7 @@ export class DashboardComponent implements OnInit {
   }
 
   async onTenantClick(tenant: Tenant): Promise<void> {
-    try {
-      const locations = await firstValueFrom(this.locationService.getLocations(tenant.id));
-
-      if (locations.content.length === 1) {
-        this.router.navigate(['/tenant', tenant.id, 'locations', locations.content[0].id]);
-      } else {
-        this.router.navigate(['/tenant', tenant.id, 'locations']);
-      }
-    } catch (error) {
-      // In case of error, fallback to locations list
-      this.router.navigate(['/tenant', tenant.id, 'locations']);
-    }
+    // Always navigate to locations list, regardless of the number of locations
+    this.router.navigate(['/tenant', tenant.id, 'locations']);
   }
 }

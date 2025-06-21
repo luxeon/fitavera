@@ -6,6 +6,7 @@ import { Page } from '../../core/models/page.model';
 import { LocationPageItemResponse } from '../../core/models/location.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../shared/components/breadcrumb/breadcrumb.component';
+import { PaymentHistoryComponent } from '../../shared/components/payment-history/payment-history.component';
 
 @Component({
   selector: 'app-location-list',
@@ -13,13 +14,16 @@ import { BreadcrumbComponent } from '../../shared/components/breadcrumb/breadcru
   imports: [
     CommonModule,
     TranslateModule,
-    BreadcrumbComponent
+    BreadcrumbComponent,
+    PaymentHistoryComponent
   ],
   template: `
     <div class="locations-container">
       <app-breadcrumb [tenantId]="tenantId"></app-breadcrumb>
 
       <h2 class="locations-title">{{ 'locations.title' | translate }}</h2>
+
+      <app-payment-history></app-payment-history>
 
       <div class="locations-grid" *ngIf="!isLoading && locations?.content?.length">
         <div
