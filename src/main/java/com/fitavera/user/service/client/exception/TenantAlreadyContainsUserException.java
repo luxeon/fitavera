@@ -5,6 +5,6 @@ import java.util.UUID;
 public class TenantAlreadyContainsUserException extends RuntimeException {
 
     public TenantAlreadyContainsUserException(UUID tenantId, UUID userId) {
-        super(String.format("Tenant %s already contains user %s", tenantId, userId));
+        super("User is already a member of this club");
     }
 }

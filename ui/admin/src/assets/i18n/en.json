@@ -149,7 +149,10 @@
         "send": "Invite",
         "sending": "Sending...",
         "success": "Successfully invited {{email}}",
-        "error": "Failed to invite client"
+        "error": {
+          "general": "Failed to invite client",
+          "alreadyExists": "User with email {{email}} is already a member of this club"
+        }
       },
       "details": {
         "title": "Client Details: {{name}}",

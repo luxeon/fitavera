@@ -115,8 +115,10 @@ export class ClientInvitationComponent implements OnInit {
 
         if (error.status === 404) {
           this.errorMessage = 'The invitation was not found or has expired.';
-        } else if (error.status === 400) {
+        } else if (error.status === 409) {
           this.errorMessage = 'You are already a member of this sport club.';
+        } else if (error.status === 400) {
+          this.errorMessage = 'The invitation has expired.';
         } else {
           this.errorMessage = 'An error occurred while processing your invitation. Please try again later.';
         }

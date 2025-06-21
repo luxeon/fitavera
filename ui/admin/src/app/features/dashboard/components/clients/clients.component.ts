@@ -83,6 +83,7 @@ import { Router } from '@angular/router';
 
       <app-invite-user-modal
         *ngIf="showInviteModal"
+        [isLoading]="isInviting"
         (close)="showInviteModal = false"
         (invite)="onInviteUser($event)">
       </app-invite-user-modal>
@@ -222,6 +223,7 @@ export class ClientsComponent implements OnInit {
 
   showInviteModal = false;
   isLoading = false;
+  isInviting = false;
   clients: ClientPageItemResponse[] = [];
   currentPage = 0;
   totalPages = 0;
@@ -256,9 +258,11 @@ export class ClientsComponent implements OnInit {
   }
 
   onInviteUser(email: string): void {
+    this.isInviting = true;
     this.userService.inviteUser(this.tenantId, email)
       .subscribe({
         next: () => {
+          this.isInviting = false;
           this.showInviteModal = false;
           this.loadClients(this.currentPage);
           this.notificationService.showSuccess(
@@ -267,9 +271,21 @@ export class ClientsComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error inviting user:', error);
-          this.notificationService.showError(
-            this.translateService.instant('dashboard.clients.invite.error')
-          );
+          this.isInviting = false;
+          
+          // Handle specific error cases
+          if (error.status === 409) {
+            this.notificationService.showError(
+              this.translateService.instant('dashboard.clients.invite.error.alreadyExists', { email })
+            );
+          } else {
+            this.notificationService.showError(
+              this.translateService.instant('dashboard.clients.invite.error.general')
+            );
+          }
+          
+          // Close the modal to reset the loading state
+          this.showInviteModal = false;
         }
       });
   }

@@ -165,7 +165,7 @@ export class ClientSignupComponent implements OnInit {
           } else if (error.status === 404) {
             this.submitError = 'The invitation was not found or has expired.';
           } else if (error.status === 409) {
-            this.submitError = 'An account with this email already exists.';
+            this.submitError = 'An account with this email already exists in this club.';
           } else {
             this.submitError = 'An error occurred during registration. Please try again.';
           }

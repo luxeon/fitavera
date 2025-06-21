@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, HostListener } from '@angular/core';
+import { Component, EventEmitter, Output, HostListener, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -168,9 +168,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class InviteUserModalComponent {
   @Output() close = new EventEmitter<void>();
   @Output() invite = new EventEmitter<string>();
+  @Input() isLoading = false;
 
   email: string = '';
-  isLoading = false;
 
   @HostListener('document:keydown.escape')
   onEscapePressed(): void {
@@ -187,12 +187,12 @@ export class InviteUserModalComponent {
   }
 
   onCancel(): void {
+    this.email = '';
     this.close.emit();
   }
 
   onInvite(): void {
     if (this.isValidEmail() && !this.isLoading) {
-      this.isLoading = true;
       this.invite.emit(this.email);
     }
   }
