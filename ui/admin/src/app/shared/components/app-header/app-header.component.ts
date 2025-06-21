@@ -32,6 +32,10 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
 
         <div class="actions-section">
+          <div class="user-info" *ngIf="userDetails">
+            <span class="user-name">{{ userDetails.firstName || ('dashboard.user' | translate) }}</span>
+          </div>
+          
           <app-language-switcher></app-language-switcher>
 
           <button mat-icon-button
@@ -90,11 +94,27 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       gap: 16px;
     }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      
+      .user-name {
+        color: #2c3e50;
+        font-weight: 500;
+        font-size: 14px;
+        margin-right: 8px;
+      }
+    }
   `]
 })
 export class AppHeaderComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  get userDetails() {
+    return this.authService.getCurrentUser();
+  }
 
   logout(): void {
     this.authService.logout();

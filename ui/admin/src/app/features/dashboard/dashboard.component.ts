@@ -34,7 +34,6 @@ import { WorkoutsComponent } from './components/workouts/workouts.component';
   template: `
     <div class="dashboard-container">
       <div class="dashboard-content">
-        <h1>{{ 'dashboard.welcome' | translate:{ name: userDetails?.firstName || ('dashboard.user' | translate) } }}</h1>
         <div *ngIf="tenantDetails" class="fitness-club">
           <span class="label">{{ 'dashboard.fitnessClub.label' | translate }}</span>
           <h2>{{ tenantDetails.name }}</h2>
@@ -109,12 +108,6 @@ import { WorkoutsComponent } from './components/workouts/workouts.component';
       max-width: 1200px;
       margin: 0 auto;
 
-      h1 {
-        color: #2c3e50;
-        margin: 0 0 16px;
-        font-size: 32px;
-      }
-
       p {
         color: #7f8c8d;
         font-size: 18px;
@@ -123,7 +116,7 @@ import { WorkoutsComponent } from './components/workouts/workouts.component';
     }
 
     .fitness-club {
-      margin: 1rem 0 2rem;
+      margin: 0 0 2rem;
 
       .label {
         color: #666;

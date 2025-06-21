@@ -13,7 +13,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<any> {
     return of({
-      'dashboard.welcome': 'Welcome, {{name}}!',
       'dashboard.user': 'User',
       'dashboard.fitnessClub.label': 'Fitness Club',
       'dashboard.subtitle': 'Welcome to your dashboard'
@@ -145,84 +144,6 @@ describe('DashboardComponent', () => {
     expect(tenantService.getAllForAuthenticatedUser).toHaveBeenCalled();
     expect(tenantService.getById).not.toHaveBeenCalled();
     expect(component.tenantDetails).toBeNull();
-  });
-
-  it('should display welcome message with user name when authenticated', async () => {
-    const mockUserDetails: UserDetailsResponse = {
-      id: '123',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      roles: ['ROLE_ADMIN'],
-      tenantIds: ['tenant-123'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const mockTenantResponse: TenantResponse = {
-      id: 'tenant-123',
-      name: 'Test Fitness Club',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const mockTenantList: TenantListItemResponse[] = [{
-      id: 'tenant-123',
-      name: 'Test Fitness Club',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }];
-
-    authService.isAuthenticated.and.returnValue(true);
-    authService.getCurrentUser.and.returnValue(mockUserDetails);
-    tenantService.getAllForAuthenticatedUser.and.returnValue(of(mockTenantList));
-    tenantService.getById.and.returnValue(of(mockTenantResponse));
-
-    component.ngOnInit();
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const welcomeMessage = fixture.debugElement.query(By.css('h1')).nativeElement;
-    expect(welcomeMessage.textContent).toContain('Welcome, John!');
-  });
-
-  it('should display generic welcome message when user has no firstName', async () => {
-    const mockUserDetails: UserDetailsResponse = {
-      id: '123',
-      firstName: '',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      roles: ['ROLE_ADMIN'],
-      tenantIds: ['tenant-123'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const mockTenantResponse: TenantResponse = {
-      id: 'tenant-123',
-      name: 'Test Fitness Club',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const mockTenantList: TenantListItemResponse[] = [{
-      id: 'tenant-123',
-      name: 'Test Fitness Club',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }];
-
-    authService.isAuthenticated.and.returnValue(true);
-    authService.getCurrentUser.and.returnValue(mockUserDetails);
-    tenantService.getAllForAuthenticatedUser.and.returnValue(of(mockTenantList));
-    tenantService.getById.and.returnValue(of(mockTenantResponse));
-
-    component.ngOnInit();
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const welcomeMessage = fixture.debugElement.query(By.css('h1')).nativeElement;
-    expect(welcomeMessage.textContent).toContain('Welcome, User!');
   });
 
   it('should show tenant name when tenant details are loaded', async () => {
