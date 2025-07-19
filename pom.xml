@@ -20,7 +20,7 @@
         <jjwt.version>0.12.6</jjwt.version>
 
         <json-unit-spring.version>4.1.1</json-unit-spring.version>
-        <greenmail-junit5.version>2.1.3</greenmail-junit5.version>
+        <greenmail-junit5.version>2.1.4</greenmail-junit5.version>
     </properties>
 
     <dependencies>
